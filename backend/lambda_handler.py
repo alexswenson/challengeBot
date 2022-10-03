@@ -4,7 +4,7 @@ import base64
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-token = "xoxb-2508506974611-4127154607221-dDGt1vT1SkPQH3vWHEdszNNW"
+token = ""
 client = WebClient(token=token)
 
 def app_home_opened(user_id, client):
@@ -502,26 +502,66 @@ def send_score_modal(trigger_id, client):
         )
 
 
+def ix(dict,n):
+    count=0
+    for i in sorted(dict.keys()):
+        if n==count:
+            return i
+        else:
+            count+=1
+            
+         
+leaderboard = ["Eli Paul", "Ian Hay", "Alex Swenson", ]
+def get_player_A(dicty):
+     dicty['view']['state']['values'][ix(dicty['view']['state']['values'],0)]['static_select-action']['selected_option']['value']
+     
+def get_player_B(dicty):
+     f['view']['state']['values'][ix(f['view']['state']['values'],2)]['static_select-action']['selected_option']['value']
+     
+def get_score(dicty):
+     f['view']['state']['values'][ix(f['view']['state']['values'],0)]['static_select-action']['selected_option']['value']
+     
 
 def lambda_handler(event, context):
 	print(event)
+	print(event['isBase64Encoded'])
 	parsed = ''
 	if event['isBase64Encoded'] == True:
+		print("true")
 		parsed = base64.b64decode(event['body'])
+		print(parsed)
 		parsed = parsed.decode('utf-8')
+		print(parsed)
 	else:
 		parsed = event['body']
+
     
-	parsed = urllib.parse.unquote(parsed)         
+	parsed = urllib.parse.unquote(parsed)  
+	print(type(parsed))
+	print(parsed)
+	if parsed[0] != "{":
+		parsed = parsed[8:]
+		parsed = json.loads(parsed)
+		print(parsed)
+		trigger_id = parsed['trigger_id']
+		send_score_modal(trigger_id, client)
+		return
+	print(parsed)
 	parsed = json.loads(parsed)
+	
+	print(type(parsed))
+   
     
 	print(parsed)
-	print(parsed['event']['type'])
-	user_id = parsed['event']['user']
+	
     
 	if parsed['event']['type'] == "app_home_opened":
+		user_id = parsed['event']['user']
 		app_home_opened(user_id, client)
         
+	# if parsed['type'] == "block_actions":
+	# 	trigger_id = parsed['trigger_id']
+	# 	send_score_modal(trigger_id, client)
     
 	return {
         'statusCode' : 200,
